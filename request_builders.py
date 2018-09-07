@@ -1,5 +1,7 @@
 import requests
 
+import response_handlers
+
 from config import config
 
 
@@ -38,7 +40,14 @@ class ActiveCampaignPostRequest(ActiveCampaignRequest):
 
     def make_post_request(self):
         response = requests.post(self.request_url, params=self.request_params, data=self.post_body)
-        return response.status_code, response.json()
+        response_body = response.json()
+
+        return response_handlers.ActiveCampaignPostResponse(
+            response_body.get('id'),
+            response_body.get('result_code'),
+            response.status_code,
+            response_body.get('result_message')
+        )
 
 
 class ListAddRequest(ActiveCampaignPostRequest):
