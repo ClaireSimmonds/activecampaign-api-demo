@@ -23,6 +23,8 @@ class ActiveCampaignRequest:
             'api_action': self.api_action
         }
 
+
+class ActiveCampaignPostRequest(ActiveCampaignRequest):
     @property
     def post_body(self):
         return {}
@@ -35,10 +37,11 @@ class ActiveCampaignRequest:
         return body
 
     def make_post_request(self):
-        return requests.post(self.request_url, params=self.request_params, data=self.post_body)
+        response = requests.post(self.request_url, params=self.request_params, data=self.post_body)
+        return response.status_code, response.json()
 
 
-class ListAddRequest(ActiveCampaignRequest):
+class ListAddRequest(ActiveCampaignPostRequest):
 
     def __init__(self, name, sender_address, sender_country):
         super().__init__()
@@ -56,7 +59,7 @@ class ListAddRequest(ActiveCampaignRequest):
         }
 
 
-class ContactAddRequest(ActiveCampaignRequest):
+class ContactAddRequest(ActiveCampaignPostRequest):
 
     def __init__(self, email, mailing_lists, first_name=None, last_name=None):
         super().__init__()
@@ -83,14 +86,14 @@ class ContactAddRequest(ActiveCampaignRequest):
         return body
 
 
-class MessageAddRequest(ActiveCampaignRequest):
+class MessageAddRequest(ActiveCampaignPostRequest):
 
     def __init__(
             self,
             mailing_lists,
             subject,
-            fromemail,
-            fromname,
+            from_email,
+            from_name,
             reply2,
             priority=3,
             charset='utf-8',
@@ -100,8 +103,8 @@ class MessageAddRequest(ActiveCampaignRequest):
         self.api_action = 'message_add'
         self.mailing_lists = mailing_lists
         self.subject = subject
-        self.fromemail = fromemail
-        self.fromname = fromname
+        self.from_email = from_email
+        self.from_name = from_name
         self.reply2 = reply2
         self.priority = priority
         self.charset = charset
@@ -111,8 +114,8 @@ class MessageAddRequest(ActiveCampaignRequest):
     def post_body(self):
         body = {
             'subject': self.subject,
-            'fromemail': self.fromemail,
-            'fromname': self.fromname,
+            'fromemail': self.from_email,
+            'fromname': self.from_name,
             'reply2': self.reply2,
             'priority': self.priority,
             'charset': self.charset,
@@ -126,8 +129,8 @@ class MessageAddRequest(ActiveCampaignRequest):
 
 class BasicHTMLMessageAddRequest(MessageAddRequest):
 
-    def __init__(self, mailing_lists, subject, fromemail, fromname, reply2, html_content, **kwargs):
-        super().__init__(mailing_lists, subject, fromemail, fromname, reply2, **kwargs)
+    def __init__(self, mailing_lists, subject, html_content, from_email, from_name, reply2, **kwargs):
+        super().__init__(mailing_lists, subject, from_email, from_name, reply2, **kwargs)
         self.html = html_content
 
     @property
@@ -140,9 +143,10 @@ class BasicHTMLMessageAddRequest(MessageAddRequest):
         return body
 
 
-class CampaignCreateRequest(ActiveCampaignRequest):
+class CampaignCreateRequest(ActiveCampaignPostRequest):
 
     def __init__(self, campaign_type, name, send_date, mailing_lists, message, status=1, public=1, track_links='all'):
+        super().__init__()
         self.api_action = 'campaign_create'
         self.type = campaign_type
         self.name = name
