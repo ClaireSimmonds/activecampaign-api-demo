@@ -1,0 +1,2 @@
+ipython
+PyYAML==3.13
