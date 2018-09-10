@@ -81,7 +81,7 @@ class ActiveCampaignAPICreateAddressTestCase(ActiveCampaignAPIMockedRequestTestC
         self.api.create_address(self.sender, [1])
         expected_post_body = {
             'company_name': self.sender['name'],
-            'addr_1': self.sender['address'],
+            'address_1': self.sender['address'],
             'city': self.sender['city'],
             'state': self.sender['state'],
             'zip': self.sender['zip'],

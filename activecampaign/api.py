@@ -69,7 +69,7 @@ class ActiveCampaignAPI:
         """
         body = {
             'company_name': sender['name'],
-            'addr_1': sender['address'],
+            'address_1': sender['address'],
             'city': sender['city'],
             'state': sender['state'],
             'zip': sender['zip'],
