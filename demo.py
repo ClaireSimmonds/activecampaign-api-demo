@@ -24,7 +24,7 @@ def get_args():
     parser.add_argument(
         '-sa',
         '--sender_address',
-        help='Physical address for the sender of this campaign',
+        help='Physical street address for the sender of this campaign',
         required=True
     )
 
@@ -36,14 +36,21 @@ def get_args():
     )
 
     parser.add_argument(
-        '-sz',
-        '--sender_zip',
-        help='City for the sender of this campaign',
+        '-ss',
+        '--sender_state',
+        help='State for the sender of this campaign',
         required=True
     )
 
     parser.add_argument(
-        '-sc',
+        '-sz',
+        '--sender_zip',
+        help='Zip Code for the sender of this campaign',
+        required=True
+    )
+
+    parser.add_argument(
+        '-sco',
         '--sender_country',
         help='Country for the sender of this campaign',
         required=True
@@ -94,18 +101,26 @@ if __name__ == '__main__':
 
     args = get_args()
 
-    # Create mailing list and add contacts
+    sender = {
+        'name': args.sender,
+        'email': args.sender_email,
+        'address': args.sender_address,
+        'city': args.sender_city,
+        'state': args.sender_state,
+        'zip': args.sender_zip,
+        'country': args.sender_country
+    }
+
+    # Create mailing list
     mailing_list_id = api.create_mailing_list(
         '{} - Mailing List'.format(args.campaign),
-        {
-            'name': args.sender,
-            'address': args.sender_address,
-            'city': args.sender_city,
-            'zip': args.sender_zip,
-            'country': args.sender_country
-        }
+        sender
     )
 
+    # Associate mailing list with a physical address
+    api.create_address(sender, [mailing_list_id])
+
+    # Add contacts to mailing list
     reader = csv.DictReader(args.contacts)
     for row in reader:
         api.create_contact(row['email'], [mailing_list_id], first_name=row['first_name'], last_name=row['last_name'])
@@ -115,9 +130,9 @@ if __name__ == '__main__':
         [mailing_list_id],
         args.subject,
         args.html.read(),
-        args.sender_email,
-        args.sender,
-        args.sender_email
+        sender['email'],
+        sender['name'],
+        sender['email']
     )
 
     # Create and schedule the campaign

@@ -41,7 +41,7 @@ class ActiveCampaignAPIParamsTestCase(ActiveCampaignAPITestCase):
 class ActiveCampaignAPICreateMailingListTestCase(ActiveCampaignAPIMockedRequestTestCase):
     def setUp(self):
         super().setUp()
-        self.sender = sender_data = {
+        self.sender = {
             'name': 'test person',
             'address': '123 S Fake St',
             'city': 'Chicago',
@@ -63,6 +63,35 @@ class ActiveCampaignAPICreateMailingListTestCase(ActiveCampaignAPIMockedRequestT
 
     def test_returns_id(self):
         self.assertEqual(self.api.create_mailing_list('test list', self.sender), 1)
+
+
+class ActiveCampaignAPICreateAddressTestCase(ActiveCampaignAPIMockedRequestTestCase):
+    def setUp(self):
+        super().setUp()
+        self.sender = {
+            'name': 'test person',
+            'address': '123 S Fake St',
+            'city': 'Chicago',
+            'state': 'il',
+            'zip': '60606',
+            'country': 'us'
+        }
+
+    def test_expected_call_args(self):
+        self.api.create_address(self.sender, [1])
+        expected_post_body = {
+            'company_name': self.sender['name'],
+            'addr_1': self.sender['address'],
+            'city': self.sender['city'],
+            'state': self.sender['state'],
+            'zip': self.sender['zip'],
+            'country': self.sender['country'],
+            'list[1]': 1
+        }
+        self.mock_make_post_request.assert_called_once_with('address_add', expected_post_body)
+
+    def test_returns_id(self):
+        self.assertEqual(self.api.create_address(self.sender, [1]), 1)
 
 
 class ActiveCampaignAPICreateContactTestCase(ActiveCampaignAPIMockedRequestTestCase):
@@ -231,3 +260,7 @@ class ActiveCampaignAPIFormatMailingListsTestCase(ActiveCampaignAPITestCase):
     def test_return_value_formatted(self):
         body_formatted = self.api._format_mailing_lists([1, 2], {'key1': 'value1'})
         self.assertDictEqual(body_formatted, {'key1': 'value1', 'p[1]': 1, 'p[2]': 2})
+
+    def test_nonstandard_prefix(self):
+        body_formatted = self.api._format_mailing_lists([1, 2], {'key1': 'value1'}, prefix='test')
+        self.assertDictEqual(body_formatted, {'key1': 'value1', 'test[1]': 1, 'test[2]': 2})

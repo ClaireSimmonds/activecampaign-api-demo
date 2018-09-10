@@ -53,6 +53,34 @@ class ActiveCampaignAPI:
         response = self._make_post_request('list_add', body)
         return response['id']
 
+    def create_address(self, sender, mailing_lists):
+        """Creates a physical address
+
+        Corresponds to the ActiveCampaign API's `address_add` action.
+
+        :param sender: Dictionary containing information about the sender associated with this mailing list; must
+            contain the following keys: 'name', 'address', 'city', 'zip', 'country'
+        :type sender: dict
+        :param mailing_lists: Mailing lists this contact should be associated with
+        :type mailing_lists: list[int]
+
+        :return: Returns the id of the created address
+        :rtype: int
+        """
+        body = {
+            'company_name': sender['name'],
+            'addr_1': sender['address'],
+            'city': sender['city'],
+            'state': sender['state'],
+            'zip': sender['zip'],
+            'country': sender['country']
+        }
+
+        body.update(self._format_mailing_lists(mailing_lists, body, prefix='list'))
+
+        response = self._make_post_request('address_add', body)
+        return response['id']
+
     def create_contact(self, email, mailing_lists, first_name=None, last_name=None):
         """Creates a contact and associates with one or more mailing lists
 
@@ -84,7 +112,7 @@ class ActiveCampaignAPI:
         body.update(self._format_mailing_lists(mailing_lists, body))
 
         response = self._make_post_request('contact_add', body)
-        return response['id']
+        return response.get('id')
 
     def create_html_message(self, mailing_lists, subject, message_content, from_email, from_name, reply_to, priority=3):
         """Creates a message comprised of HTML content
@@ -186,7 +214,7 @@ class ActiveCampaignAPI:
             return response_body
 
     @staticmethod
-    def _format_mailing_lists(mailing_list_ids, body):
+    def _format_mailing_lists(mailing_list_ids, body, prefix='p'):
         """Formats mailing list attributes for submission to the ActiveCampaign API
 
         :param mailing_list_ids: Mailing list IDs to be converted to the proper ActiveCampaign submission format
@@ -198,6 +226,6 @@ class ActiveCampaignAPI:
         :rtype: dict
         """
         for list_id in mailing_list_ids:
-            body['p[{}]'.format(list_id)] = list_id
+            body['{}[{}]'.format(prefix, list_id)] = list_id
 
         return body
