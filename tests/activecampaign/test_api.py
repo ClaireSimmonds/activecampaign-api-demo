@@ -39,17 +39,30 @@ class ActiveCampaignAPIParamsTestCase(ActiveCampaignAPITestCase):
 
 
 class ActiveCampaignAPICreateMailingListTestCase(ActiveCampaignAPIMockedRequestTestCase):
+    def setUp(self):
+        super().setUp()
+        self.sender = sender_data = {
+            'name': 'test person',
+            'address': '123 S Fake St',
+            'city': 'Chicago',
+            'zip': '60606',
+            'country': 'us'
+        }
+
     def test_expected_call_args(self):
-        self.api.create_mailing_list('test list', '123 S Fake St, Chicago IL', 'us')
+        self.api.create_mailing_list('test list', self.sender)
         expected_post_body = {
             'name': 'test list',
-            'sender_addr1': '123 S Fake St, Chicago IL',
+            'sender_name': 'test person',
+            'sender_addr1': '123 S Fake St',
+            'sender_city': 'Chicago',
+            'sender_zip': '60606',
             'sender_country': 'us'
         }
         self.mock_make_post_request.assert_called_once_with('list_add', expected_post_body)
 
     def test_returns_id(self):
-        self.assertEqual(self.api.create_mailing_list('test list', '123 S Fake St, Chicago IL', 'us'), 1)
+        self.assertEqual(self.api.create_mailing_list('test list', self.sender), 1)
 
 
 class ActiveCampaignAPICreateContactTestCase(ActiveCampaignAPIMockedRequestTestCase):

@@ -8,38 +8,66 @@ def get_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        'sender',
+        '-s',
+        '--sender',
         help='Name of the sender of this campaign',
+        required=True
     )
 
     parser.add_argument(
-        'sender_email',
+        '-se',
+        '--sender_email',
         help='Email address for the sender of this campaign',
+        required=True
     )
 
     parser.add_argument(
-        'sender_address',
+        '-sa',
+        '--sender_address',
         help='Physical address for the sender of this campaign',
+        required=True
     )
 
     parser.add_argument(
-        'sender_country',
+        '-sc',
+        '--sender_city',
+        help='City for the sender of this campaign',
+        required=True
+    )
+
+    parser.add_argument(
+        '-sz',
+        '--sender_zip',
+        help='City for the sender of this campaign',
+        required=True
+    )
+
+    parser.add_argument(
+        '-sc',
+        '--sender_country',
         help='Country for the sender of this campaign',
+        required=True
     )
 
     parser.add_argument(
-        'campaign',
+        '-cpgn',
+        '--campaign',
         help='Name of this email campaign',
+        required=True
     )
 
     parser.add_argument(
-        'campaign_date',
+        '-cd',
+        '--campaign_date',
         help='Date and time (format: YYYY-MM-DD hh:mm:ss) when emails in this campaign should be scheduled for sending',
+        required=True
     )
 
     parser.add_argument(
-        'subject',
+        '-sub',
+        '--subject',
         help='Email subject for the campaign',
+        required=True
     )
 
     parser.add_argument(
@@ -69,8 +97,13 @@ if __name__ == '__main__':
     # Create mailing list and add contacts
     mailing_list_id = api.create_mailing_list(
         '{} - Mailing List'.format(args.campaign),
-        args.sender_address,
-        args.sender_country
+        {
+            'name': args.sender,
+            'address': args.sender_address,
+            'city': args.sender_city,
+            'zip': args.sender_zip,
+            'country': args.sender_country
+        }
     )
 
     reader = csv.DictReader(args.contacts)

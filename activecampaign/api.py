@@ -27,25 +27,27 @@ class ActiveCampaignAPI:
             'api_output': self.api_output
         }
 
-    def create_mailing_list(self, name, address, country):
+    def create_mailing_list(self, name, sender):
         """Creates a mailing list
 
         Corresponds to the ActiveCampaign API's `list_add` action.
 
         :param name: Name to assign the mailing list
         :type name: str
-        :param address: Physical address of the sender associated with this mailing list
-        :type address: str
-        :param country: Country code for the sender associated with this mailing list
-        :type country: str
+        :param sender: Dictionary containing information about the sender associated with this mailing list; must
+            contain the following keys: 'name', 'address', 'city', 'zip', 'country'
+        :type sender: dict
 
         :return: Returns the id of the created mailing list
         :rtype: int
         """
         body = {
             'name': name,
-            'sender_addr1': address,
-            'sender_country': country
+            'sender_name': sender['name'],
+            'sender_addr1': sender['address'],
+            'sender_city': sender['city'],
+            'sender_zip': sender['zip'],
+            'sender_country': sender['country']
         }
 
         response = self._make_post_request('list_add', body)
